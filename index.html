@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>سامانه حضور و غیاب قرآنی نور | نسخه آنلاین</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/persian-date@1.1.0/dist/persian-date.min.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100;300;400;500;600;700;800;900&display=swap');
+
+        :root {
+            --bg: #0f172a;
+            --bg2: #1e293b;
+            --glass: rgba(30, 41, 59, 0.7);
+            --text: #f1f5f9;
+            --text2: #94a3b8;
+            --border: rgba(255, 255, 255, 0.12);
+            --accent: #6366f1;
+            --green: #10b981;
+            --red: #ef4444;
+            --orange: #f59e0b;
+            --blue: #3b82f6;
+            --gold: #ffd700;
+            --purple: #a78bfa;
+        }
+
+        .light-theme {
+            --bg: #f8fafc;
+            --bg2: #ffffff;
+            --glass: rgba(255, 255, 255, 0.85);
+            --text: #1e293b;
+            --text2: #64748b;
+            --border: rgba(0, 0, 0, 0.08);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Vazirmatn', sans-serif; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 12px;
+            transition: all 0.3s;
+        }
+
+        .container { max-width: 1300px; margin: 0 auto; }
+
+        /* ==================== 3D GLASS BUTTONS ==================== */
+        .btn {
+            padding: 11px 18px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 
+                0 6px 15px rgba(0, 0, 0, 0.25),
+                inset 0 2px 2px rgba(255, 255, 255, 0.35),
+                inset 0 -4px 4px rgba(0, 0, 0, 0.25);
+            transform: translateY(0);
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 
+                0 10px 20px rgba(0, 0, 0, 0.35),
+                inset 0 2px 2px rgba(255, 255, 255, 0.45),
+                inset 0 -4px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:active {
+            transform: translateY(3px);
+            box-shadow: 
+                0 2px 5px rgba(0, 0, 0, 0.2),
+                inset 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-primary { background: linear-gradient(135deg, rgba(99,102,241,0.85), rgba(79,70,229,0.95)); color: white; }
+        .btn-success { background: linear-gradient(135deg, rgba(16,185,129,0.85), rgba(5,150,105,0.95)); color: white; }
+        .btn-warning { background: linear-gradient(135deg, rgba(245,158,11,0.85), rgba(217,119,6,0.95)); color: #000; text-shadow: none; }
+        .btn-danger  { background: linear-gradient(135deg, rgba(239,68,68,0.85), rgba(220,38,38,0.95)); color: white; }
+        .btn-outline { background: rgba(255, 255, 255, 0.05); color: var(--text); border: 1px solid var(--border); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .btn-sm { padding: 8px 14px; font-size: 12px; border-radius: 10px; }
+        .btn-xs { padding: 5px 10px; font-size: 11px; border-radius: 8px; }
+
+        .header {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 16px 20px;
+            margin-bottom: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+
+        .header h1 {
+            font-size: 20px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            margin-bottom: 14px;
+        }
+
+        .tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; border-bottom: 2px solid var(--border); padding-bottom: 12px; }
+        
+        .tab {
+            padding: 10px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            background: rgba(255,255,255,0.03);
+            color: var(--text2);
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.2s;
+            box-shadow: inset 0 -2px 0 rgba(0,0,0,0.1);
+        }
+        .tab:hover { color: var(--text); background: rgba(255,255,255,0.08); }
+        .tab.active { 
+            background: linear-gradient(135deg, var(--accent), #4f46e5); 
+            color: white; 
+            border-color: rgba(255,255,255,0.3);
+            box-shadow: 0 4px 12px rgba(99,102,241,0.4), inset 0 2px 2px rgba(255,255,255,0.3); 
+        }
+
+        .toolbar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+        .toolbar-group { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+        input[type="text"], input[type="password"], input[type="tel"], select {
+            padding: 10px 14px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 12px;
+            outline: none;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+            transition: 0.2s;
+        }
+        .light-theme input, .light-theme select { background: #f1f5f9; }
+        input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(99,102,241,0.25); }
+        .date-input { width: 140px; }
+        .search-input { width: 180px; }
+
+        .stats-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 16px; }
+        @media (max-width: 768px) { .stats-row { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 400px) { .stats-row { grid-template-columns: repeat(2, 1fr); } }
+        
+        .stat-item {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 12px 8px;
+            text-align: center;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15), inset 0 1px 1px rgba(255,255,255,0.1);
+            transition: all 0.2s;
+        }
+        .stat-item:hover { transform: translateY(-3px); border-color: rgba(255,255,255,0.3); }
+        .stat-item .count { font-size: 26px; font-weight: 900; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+        .stat-item .label { font-size: 11px; color: var(--text2); margin-top: 2px; font-weight: 600; }
+        
+        .c-present { color: var(--green); }
+        .c-absent { color: var(--red); }
+        .c-late { color: var(--orange); }
+        .c-leave { color: var(--blue); }
+        .c-total { color: var(--purple); }
+
+        .student-list { display: flex; flex-direction: column; gap: 8px; max-height: 58vh; overflow-y: auto; padding-right: 4px; }
+        .student-item {
+            display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+            border-radius: 14px; border: 1px solid var(--border);
+            background: rgba(255,255,255,0.03); backdrop-filter: blur(10px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: all 0.2s;
+        }
+        .student-item.present { border-color: rgba(16,185,129,0.5); background: linear-gradient(90deg, rgba(16,185,129,0.12), transparent); }
+        .student-item.absent  { border-color: rgba(239,68,68,0.5);  background: linear-gradient(90deg, rgba(239,68,68,0.12), transparent); }
+        .student-item.late    { border-color: rgba(245,158,11,0.5); background: linear-gradient(90deg, rgba(245,158,11,0.12), transparent); }
+        .student-item.leave   { border-color: rgba(59,130,246,0.5); background: linear-gradient(90deg, rgba(59,130,246,0.12), transparent); }
+        
+        .student-num { width: 24px; text-align: center; font-size: 12px; color: var(--text2); font-weight: bold; }
+        .student-info { flex: 1; min-width: 0; }
+        .student-name { font-weight: 700; font-size: 13px; }
+        .student-phone { font-size: 11px; color: var(--text2); }
+        
+        /* 3D Glass Status Switches */
+        .status-btns { display: flex; gap: 6px; }
+        .status-btn {
+            width: 36px; height: 36px; border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.05);
+            cursor: pointer; font-size: 15px; transition: all 0.15s;
+            display: flex; align-items: center; justify-content: center; color: var(--text2);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.2);
+        }
+        .status-btn:hover { transform: scale(1.08); color: white; }
+        .status-btn:active { transform: scale(0.95); }
+        .status-btn.active-present { background: var(--green); border-color: #059669; color: white; box-shadow: 0 0 12px rgba(16,185,129,0.6), inset 0 2px 2px rgba(255,255,255,0.4); }
+        .status-btn.active-absent  { background: var(--red);   border-color: #dc2626; color: white; box-shadow: 0 0 12px rgba(239,68,68,0.6),  inset 0 2px 2px rgba(255,255,255,0.4); }
+        .status-btn.active-late    { background: var(--orange);border-color: #d97706; color: #000; box-shadow: 0 0 12px rgba(245,158,11,0.6), inset 0 2px 2px rgba(255,255,255,0.4); }
+        .status-btn.active-leave   { background: var(--blue);  border-color: #2563eb; color: white; box-shadow: 0 0 12px rgba(59,130,246,0.6), inset 0 2px 2px rgba(255,255,255,0.4); }
+
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 16px; }
+        .modal.active { display: flex; animation: modalIn 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes modalIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        
+        .modal-content { background: var(--bg2); border: 1px solid rgba(255,255,255,0.2); border-radius: 20px; padding: 24px; width: 100%; max-width: 480px; box-shadow: 0 20px 50px rgba(0,0,0,0.6); }
+        .modal-content label { display: block; margin-bottom: 6px; font-size: 12px; color: var(--text2); font-weight: 600; margin-top: 12px; }
+        .modal-content input, .modal-content select, .modal-content textarea { width: 100%; margin-bottom: 4px; }
+        .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+
+        .toast-container { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 2000; display: flex; flex-direction: column; gap: 8px; align-items: center; pointer-events: none; }
+        .toast { padding: 12px 24px; border-radius: 14px; font-weight: 700; font-size: 13px; animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 10px 25px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.3); color: white; backdrop-filter: blur(10px); }
+        .toast-success { background: rgba(16, 185, 129, 0.9); border: 1px solid #059669; }
+        .toast-error   { background: rgba(239, 68, 68, 0.9);  border: 1px solid #dc2626; }
+        .toast-info    { background: rgba(99, 102, 241, 0.9); border: 1px solid #4f46e5; }
+        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        #login-screen { display: flex; align-items: center; justify-content: center; min-height: 85vh; }
+        .login-box { background: var(--glass); backdrop-filter: blur(25px); border: 1px solid rgba(255,255,255,0.2); border-radius: 24px; padding: 36px 28px; max-width: 400px; width: 100%; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        .login-box input { margin-bottom: 14px; width: 100%; text-align: center; }
+        
+        .hidden { display: none !important; }
+        
+        .table-mini { width: 100%; border-collapse: separate; border-spacing: 0 6px; font-size: 12px; }
+        .table-mini th { padding: 10px; color: var(--text2); font-weight: 600; border-bottom: 1px solid var(--border); }
+        .table-mini td { padding: 12px 10px; background: rgba(255,255,255,0.02); }
+        .table-mini tr td:first-child { border-radius: 0 10px 10px 0; }
+        .table-mini tr td:last-child { border-radius: 10px 0 0 10px; }
+
+        .cloud-badge { font-size: 11px; padding: 4px 10px; border-radius: 20px; background: rgba(16,185,129,0.15); border: 1px solid var(--green); color: var(--green); display: inline-flex; align-items: center; gap: 4px;}
+        .cloud-badge.offline { background: rgba(239,68,68,0.15); border-color: var(--red); color: var(--red); }
+    </style>
+</head>
+<body>
+
+    <div class="toast-container" id="toasts"></div>
+
+    <div class="container">
+        <div id="login-screen">
+            <div class="login-box">
+                <div style="font-size: 56px; margin-bottom: 12px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));">🕌</div>
+                <h2 style="font-weight: 900; font-size: 24px; margin-bottom: 6px;">سامانه نور</h2>
+                <p style="color: var(--text2); margin-bottom: 24px; font-size: 13px;">حوزه علمیه صدیقیه ایرانشهر</p>
+                <input type="text" id="login-username" placeholder="نام کاربری" autocomplete="off">
+                <input type="password" id="login-password" placeholder="رمز عبور" autocomplete="off">
+                <button class="btn btn-primary" style="width:100%; justify-content: center; margin-top: 8px;" onclick="login()">🔐 ورود به سامانه</button>
+            </div>
+        </div>
+
+        <div id="app-screen" class="hidden">
+            <div class="header">
+                <div>
+                    <h1>📖 سامانه نور</h1>
+                    <span style="font-size:12px; font-weight:bold; color:var(--gold);" id="header-role"></span>
+                </div>
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <span id="cloud-status" class="cloud-badge offline">☁️ قطع از متصل</span>
+                    <button class="btn btn-outline btn-sm" onclick="toggleTheme()">🌓</button>
+                    <button class="btn btn-danger btn-sm" onclick="logout()">🚪 خروج</button>
+                </div>
+            </div>
+
+            <div id="teacher-panel" class="hidden">
+                <div class="card">
+                    <div class="tabs">
+                        <div class="tab active" onclick="switchTeacherTab('attendance')">📋 ثبت حضور</div>
+                        <div class="tab" onclick="switchTeacherTab('students')">👥 مدیریت قرآن‌آموزان</div>
+                        <div class="tab" onclick="switchTeacherTab('classes')">📚 کلاس‌های من</div>
+                    </div>
+
+                    <div id="tab-attendance">
+                        <div class="toolbar">
+                            <div class="toolbar-group">
+                                <input type="text" class="date-input" id="attendance-date">
+                                <select id="attendance-class-filter" onchange="renderStudentList()" style="width:160px;"></select>
+                                <input type="text" class="search-input" id="student-search" placeholder="🔍 جستجوی نام..." oninput="renderStudentList()">
+                            </div>
+                            <div class="toolbar-group">
+                                <button class="btn btn-xs btn-success" onclick="quickSetAll('present')">✅ همه حاضر</button>
+                                <button class="btn btn-xs btn-warning" onclick="quickSetAll('late')">⏰ همه تأخیر</button>
+                                <button class="btn btn-sm btn-primary" onclick="saveAttendance()">☁️ ذخیره آنلاین و نهایی</button>
+                            </div>
+                        </div>
+
+                        <div class="stats-row">
+                            <div class="stat-item" onclick="filterByStatus('all')"><div class="count c-total" id="count-total">0</div><div class="label">کل نفرات</div></div>
+                            <div class="stat-item" onclick="filterByStatus('present')"><div class="count c-present" id="count-present">0</div><div class="label">حاضر</div></div>
+                            <div class="stat-item" onclick="filterByStatus('absent')"><div class="count c-absent" id="count-absent">0</div><div class="label">غایب</div></div>
+                            <div class="stat-item" onclick="filterByStatus('late')"><div class="count c-late" id="count-late">0</div><div class="label">تأخیر</div></div>
+                            <div class="stat-item" onclick="filterByStatus('leave')"><div class="count c-leave" id="count-leave">0</div><div class="label">مرخصی</div></div>
+                        </div>
+
+                        <div class="student-list" id="student-list"></div>
+                    </div>
+
+                    <div id="tab-students" class="hidden">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:16px;">
+                            <h3>👥 لیست کل قرآن‌آموزان</h3>
+                            <button class="btn btn-primary btn-sm" onclick="openStudentModal()">➕ افزودن شاگرد</button>
+                        </div>
+                        <table class="table-mini" id="manage-students-table">
+                            <thead><tr><th>ردیف</th><th>نام</th><th>تلفن</th><th>کلاس</th><th>عملیات</th></tr></thead>
+                            <tbody id="manage-students-tbody"></tbody>
+                        </table>
+                    </div>
+
+                    <div id="tab-classes" class="hidden">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:16px;">
+                            <h3>📚 کلاس‌های تعریف شده</h3>
+                            <button class="btn btn-primary btn-sm" onclick="openClassModal()">➕ کلاس جدید</button>
+                        </div>
+                        <table class="table-mini">
+                            <thead><tr><th>نام کلاس</th><th>تعداد شاگرد</th><th>عملیات</th></tr></thead>
+                            <tbody id="classes-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="admin-panel" class="hidden">
+                <div class="card">
+                    <div style="display:flex; justify-content:space-between; margin-bottom: 20px;">
+                        <h3>تنظیمات اتصال به سرور ابری (Google Sheets)</h3>
+                        <button class="btn btn-primary btn-sm" onclick="openAdminConfig()">⚙️ پیکربندی متصل‌کننده</button>
+                    </div>
+                    <p style="color:var(--text2); font-size:13px; line-height: 1.8;">
+                        سیستم در حالت پیش‌فرض روی LocalStorage (حافظه مرورگر) کار می‌کند. با وارد کردن Web App URL از گوگل اسکریپت در بخش تنظیمات، تمام دکمه‌های «ذخیره نهایی» مستقیماً اطلاعات را به شیت آنلاین شما شلیک می‌کنند.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="student-modal">
+        <div class="modal-content">
+            <h3 id="student-modal-title">➕ افزودن قرآن‌آموز جدید</h3>
+            <input type="hidden" id="edit-student-id">
+            <label>نام و نام خانوادگی</label><input type="text" id="edit-student-name">
+            <label>شماره موبایل والدین</label><input type="tel" id="edit-student-phone">
+            <label>کلاس</label><select id="edit-student-class"></select>
+            <div class="modal-actions">
+                <button class="btn btn-primary btn-sm" onclick="saveStudent()">تأیید و ذخیره</button>
+                <button class="btn btn-outline btn-sm" onclick="closeModal('student-modal')">انصراف</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="class-modal">
+        <div class="modal-content">
+            <h3 id="class-modal-title">➕ ایجاد کلاس جدید</h3>
+            <input type="hidden" id="edit-class-id">
+            <label>نام کلاس</label><input type="text" id="edit-class-name">
+            <div class="modal-actions">
+                <button class="btn btn-primary btn-sm" onclick="saveClass()">ذخیره</button>
+                <button class="btn btn-outline btn-sm" onclick="closeModal('class-modal')">بستن</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="cloud-modal">
+        <div class="modal-content">
+            <h3>☁️ اتصال به گوگل شیت</h3>
+            <label>لینک وب‌اپلیکیشن (Google Script Web App URL)</label>
+            <input type="text" id="cloud-url-input" placeholder="https://script.google.com/macros/s/..." dir="ltr">
+            <div class="modal-actions">
+                <button class="btn btn-success btn-sm" onclick="saveCloudUrl()">اتصال</button>
+                <button class="btn btn-outline btn-sm" onclick="closeModal('cloud-modal')">بستن</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const todayPersian = new persianDate().format('YYYY/MM/DD');
+        const STORAGE_KEY = 'noor_3d_cloud_v1';
+        
+        let state = {
+            currentUser: null, theme: 'dark', cloudUrl: '',
+            users: [
+                { id: 'u0', name: 'مدیر کل', role: 'admin', username: 'admin', password: 'admin' },
+                { id: 'u1', name: 'استاد علوی', role: 'teacher', username: 'alavi', password: '123', classIds: ['c1'] }
+            ],
+            classes: [{ id: 'c1', name: 'حفظ جزء ۳۰ (صدیقیه)', teacherId: 'u1' }],
+            students: [
+                { id: 's1', classId: 'c1', name: 'محمدامین رضایی', phone: '09121111111', attendance: {} },
+                { id: 's2', classId: 'c1', name: 'امیرعلی کریمی', phone: '09122222222', attendance: {} }
+            ],
+            tempStatuses: {}, filterStatus: 'all'
+        };
+
+        function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+        function loadData() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) { try { state = JSON.parse(saved); } catch(e) {} }
+            checkCloudBadge();
+        }
+
+        function toast(msg, type='success') {
+            const c = document.getElementById('toasts');
+            const t = document.createElement('div');
+            t.className = `toast toast-${type}`;
+            t.innerHTML = msg;
+            c.appendChild(t);
+            setTimeout(() => { t.style.opacity='0'; setTimeout(()=>t.remove(),300); }, 3000);
+        }
+
+        function checkCloudBadge() {
+            const b = document.getElementById('cloud-status');
+            if(state.cloudUrl) { b.className = 'cloud-badge'; b.innerHTML = '☁️ متصل به گوگل‌شیت'; }
+            else { b.className = 'cloud-badge offline'; b.innerHTML = '⚠️ ذخیره فقط در گوشی'; }
+        }
+
+        function login() {
+            const u = document.getElementById('login-username').value.trim();
+            const p = document.getElementById('login-password').value.trim();
+            const user = state.users.find(x => x.username === u && x.password === p);
+            if(user) {
+                state.currentUser = user;
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('app-screen').classList.remove('hidden');
+                document.getElementById('header-role').textContent = user.name;
+                document.getElementById('attendance-date').value = todayPersian;
+                loadDashboard();
+            } else toast('نام کاربری یا رمز اشتباه است', 'error');
+        }
+
+        function logout() { location.reload(); }
+
+        function loadDashboard() {
+            document.getElementById('teacher-panel').classList.remove('hidden');
+            if(state.currentUser.role === 'admin') document.getElementById('admin-panel').classList.remove('hidden');
+            populateClassFilters(); renderStudentList();
+        }
+
+        function populateClassFilters() {
+            const myClasses = state.classes;
+            const sel1 = document.getElementById('attendance-class-filter');
+            const sel2 = document.getElementById('edit-student-class');
+            sel1.innerHTML = '<option value="all">همه کلاس‌ها</option>' + myClasses.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+            sel2.innerHTML = myClasses.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+        }
+
+        function switchTeacherTab(tab) {
+            document.querySelectorAll('#teacher-panel .tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            ['attendance','students','classes'].forEach(t => document.getElementById('tab-'+t).classList.add('hidden'));
+            document.getElementById('tab-'+tab).classList.remove('hidden');
+            if(tab === 'students') renderManageStudents();
+            if(tab === 'classes') renderClasses();
+        }
+
+        function getEffectiveStatus(studentId, date) {
+            if(state.tempStatuses[studentId+'_'+date]) return state.tempStatuses[studentId+'_'+date];
+            return state.students.find(s => s.id === studentId)?.attendance?.[date]?.status || 'pending';
+        }
+
+        function toggleStatus(id, status) {
+            const d = document.getElementById('attendance-date').value || todayPersian;
+            state.tempStatuses[id+'_'+d] = (getEffectiveStatus(id, d) === status) ? 'pending' : status;
+            renderStudentList();
+        }
+
+        function quickSetAll(st) {
+            const d = document.getElementById('attendance-date').value || todayPersian;
+            state.students.forEach(s => state.tempStatuses[s.id+'_'+d] = st);
+            renderStudentList();
+        }
+
+        function filterByStatus(st) { state.filterStatus = st; renderStudentList(); }
+
+        function renderStudentList() {
+            const d = document.getElementById('attendance-date').value || todayPersian;
+            const q = document.getElementById('student-search').value.toLowerCase();
+            const cFilter = document.getElementById('attendance-class-filter').value;
+            
+            let list = state.students.filter(s => s.name.toLowerCase().includes(q));
+            if(cFilter !== 'all') list = list.filter(s => s.classId === cFilter);
+            if(state.filterStatus !== 'all') list = list.filter(s => getEffectiveStatus(s.id, d) === state.filterStatus);
+
+            let p=0, a=0, lt=0, lv=0;
+            state.students.forEach(s => {
+                const st = getEffectiveStatus(s.id, d);
+                if(st==='present') p++; if(st==='absent') a++; if(st==='late') lt++; if(st==='leave') lv++;
+            });
+            document.getElementById('count-total').innerText = state.students.length;
+            document.getElementById('count-present').innerText = p;
+            document.getElementById('count-absent').innerText = a;
+            document.getElementById('count-late').innerText = lt;
+            document.getElementById('count-leave').innerText = lv;
+
+            document.getElementById('student-list').innerHTML = list.map((s, idx) => {
+                const st = getEffectiveStatus(s.id, d);
+                return `
+                <div class="student-item ${st}">
+                    <div class="student-num">${idx+1}</div>
+                    <div class="student-info">
+                        <div class="student-name">${s.name}</div>
+                        <div class="student-phone">${s.phone}</div>
+                    </div>
+                    <div class="status-btns">
+                        <div class="status-btn ${st==='present'?'active-present':''}" onclick="toggleStatus('${s.id}','present')">✅</div>
+                        <div class="status-btn ${st==='late'?'active-late':''}" onclick="toggleStatus('${s.id}','late')">⏰</div>
+                        <div class="status-btn ${st==='absent'?'active-absent':''}" onclick="toggleStatus('${s.id}','absent')">❌</div>
+                        <div class="status-btn ${st==='leave'?'active-leave':''}" onclick="toggleStatus('${s.id}','leave')">📝</div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        // ==================== موتور ارسال به گوگل شیت ====================
+        async function saveAttendance() {
+            const date = document.getElementById('attendance-date').value || todayPersian;
+            
+            // ۱. ثبت در حافظه داخلی گوشی
+            Object.keys(state.tempStatuses).forEach(key => {
+                const [sId, d] = key.split('_');
+                if(d === date) {
+                    const stu = state.students.find(s => s.id === sId);
+                    if(stu) {
+                        if(!stu.attendance) stu.attendance = {};
+                        stu.attendance[date] = { status: state.tempStatuses[key], time: new Date().toLocaleTimeString() };
+                    }
+                }
+            });
+            saveData();
+            state.tempStatuses = {};
+            renderStudentList();
+
+            // ۲. ارسال به ابر (در صورت وجود لینک)
+            if(!state.cloudUrl) {
+                toast('✅ روی حافظه گوشی ذخیره شد (آفلاین)');
+                return;
+            }
+
+            toast('☁️ در حال ارسال اطلاعات به سرور گوگل...', 'info');
+
+            const payload = state.students.map(s => ({
+                date: date,
+                studentName: s.name,
+                className: state.classes.find(c => c.id === s.classId)?.name || '',
+                status: s.attendance?.[date]?.status || 'حاضر نشده'
+            }));
+
+            try {
+                await fetch(state.cloudUrl, {
+                    method: 'POST',
+                    mode: 'no-cors', // حیاتی برای رد کردن ارور CORS گوگل
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                toast('🎉 با موفقیت در اکسل گوگل ثبت شد!');
+            } catch (err) {
+                toast('❌ ذخیره در گوشی انجام شد اما ارسال به اینترنت شکست خورد.', 'error');
+            }
+        }
+
+        function renderManageStudents() {
+            document.getElementById('manage-students-tbody').innerHTML = state.students.map((s,i) => `
+                <tr><td>${i+1}</td><td><strong>${s.name}</strong></td><td>${s.phone}</td><td>${state.classes.find(c=>c.id===s.classId)?.name||''}</td>
+                <td><button class="btn btn-xs btn-danger" onclick="deleteStu('${s.id}')">حذف</button></td></tr>`).join('');
+        }
+        function openStudentModal() { document.getElementById('student-modal').classList.add('active'); }
+        function saveStudent() {
+            state.students.push({ id: 's'+Date.now(), name: document.getElementById('edit-student-name').value, phone: document.getElementById('edit-student-phone').value, classId: document.getElementById('edit-student-class').value, attendance:{} });
+            saveData(); closeModal('student-modal'); renderManageStudents();
+        }
+        function deleteStu(id) { state.students = state.students.filter(s=>s.id!==id); saveData(); renderManageStudents(); }
+
+        function renderClasses() {
+            document.getElementById('classes-tbody').innerHTML = state.classes.map(c => `
+                <tr><td><strong>${c.name}</strong></td><td>${state.students.filter(s=>s.classId===c.id).length}</td>
+                <td><button class="btn btn-xs btn-danger" onclick="deleteCls('${c.id}')">حذف</button></td></tr>`).join('');
+        }
+        function openClassModal() { document.getElementById('class-modal').classList.add('active'); }
+        function saveClass() {
+            state.classes.push({ id:'c'+Date.now(), name:document.getElementById('edit-class-name').value, teacherId:'u1' });
+            saveData(); closeModal('class-modal'); populateClassFilters(); renderClasses();
+        }
+        function deleteCls(id) { state.classes=state.classes.filter(c=>c.id!==id); saveData(); renderClasses(); }
+
+        function openAdminConfig() { document.getElementById('cloud-url-input').value = state.cloudUrl; document.getElementById('cloud-modal').classList.add('active'); }
+        function saveCloudUrl() { state.cloudUrl = document.getElementById('cloud-url-input').value.trim(); saveData(); closeModal('cloud-modal'); toast('لینک سرور ابری متصل شد'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+        function toggleTheme() { document.body.classList.toggle('light-theme'); }
+
+        loadData();
+    </script>
+</body>
+</html>
