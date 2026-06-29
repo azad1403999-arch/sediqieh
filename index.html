@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>سامانه حضور و غیاب قرآنی  | نسخه آنلاین</title>
+    <title>سامانه حضور و غیاب</title>
     
     <script src="https://cdn.jsdelivr.net/npm/persian-date@1.1.0/dist/persian-date.min.js"></script>
     
@@ -86,7 +86,7 @@
         /* Modals & Utils */
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 16px; }
         .modal.active { display: flex; }
-        .modal-content { background: var(--bg2); border: 1px solid rgba(255,255,255,0.2); border-radius: 20px; padding: 24px; width: 100%; max-width: 480px; box-shadow: 0 20px 50px rgba(0,0,0,0.6); }
+        .modal-content { background: var(--bg2); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 20px; padding: 24px; width: 100%; max-width: 480px; box-shadow: 0 20px 50px rgba(0,0,0,0.6); }
         .modal-content label { display: block; margin-bottom: 6px; font-size: 12px; color: var(--text2); font-weight: 600; margin-top: 12px; }
         .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
 
@@ -106,18 +106,19 @@
         .role-switch { display: flex; gap: 8px; margin-bottom: 20px; background: rgba(0,0,0,0.2); padding: 6px; border-radius: 14px; }
         .role-btn { flex: 1; padding: 10px; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 13px; transition: 0.3s; text-align: center; color: var(--text2); }
         .role-btn.active { background: var(--accent); color: white; box-shadow: 0 4px 10px rgba(99,102,241,0.4); }
+        
+        .designer-credit { font-size: 11px; color: var(--text2); margin-top: 20px; border-top: 1px solid var(--border); padding-top: 12px; }
     </style>
 </head>
 <body>
     <div class="toast-container" id="toasts"></div>
 
     <div class="container">
-        <!-- Login Screen -->
         <div id="login-screen">
             <div class="login-box">
-                <div style="font-size: 56px; margin-bottom: 12px;"></div>
-                <h2 style="font-weight: 900; font-size: 24px; margin-bottom: 6px;">سامانه حضور و غیاب (طراح: مولوی محمد براهویی)</h2>
-                <p style="color: var(--text2); margin-bottom: 24px; font-size: 13px;">حوزه علمیه صدیقیه ایرانشهر</p>
+                <div style="font-size: 56px; margin-bottom: 12px;">📋</div>
+                <h2 style="font-weight: 900; font-size: 24px; margin-bottom: 6px;">سامانه حضور و غیاب</h2>
+                <p style="color: var(--gold); margin-bottom: 24px; font-size: 12px; font-weight: bold;">طراحی: مولوی محمد براهویی</p>
                 
                 <div class="role-switch">
                     <div class="role-btn active" id="btn-login-teacher" onclick="setLoginRole('teacher')">ورود مربی</div>
@@ -131,12 +132,14 @@
             </div>
         </div>
 
-        <!-- Main App Screen -->
         <div id="app-screen" class="hidden">
             <div class="header">
                 <div>
-                    <h1>📖 سامانه حضور و غیاب</h1>
-                    <span style="font-size:12px; font-weight:bold; color:var(--gold);" id="header-role"></span>
+                    <h1>📋 سامانه حضور و غیاب</h1>
+                    <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px;">
+                        <span style="font-size:11px; font-weight:bold; color:var(--gold);" id="header-role"></span>
+                        <span style="font-size:11px; color:var(--text2);">| طراح: مولوی محمد براهویی</span>
+                    </div>
                 </div>
                 <div style="display:flex; gap:10px; align-items:center;">
                     <span id="cloud-status" style="font-size: 11px;"></span>
@@ -145,13 +148,12 @@
                 </div>
             </div>
 
-            <!-- Teacher Panel -->
             <div id="teacher-panel" class="hidden">
                 <div class="card">
                     <div class="tabs">
                         <div class="tab active" onclick="switchTeacherTab('attendance')">📋 ثبت حضور</div>
-                        <div class="tab" onclick="switchTeacherTab('students')">👥 مدیریت قرآن‌آموزان</div>
-                        <div class="tab" onclick="switchTeacherTab('classes')">📚 کلاس‌های من</div>
+                        <div class="tab" onclick="switchTeacherTab('students')">👥 مدیریت مراجعین</div>
+                        <div class="tab" onclick="switchTeacherTab('classes')">📚 کلاس‌ها / گروه‌ها</div>
                     </div>
 
                     <div id="tab-attendance">
@@ -179,11 +181,10 @@
                         <div class="student-list" id="student-list"></div>
                     </div>
 
-                    <!-- Manage Students & Classes remain same... -->
                     <div id="tab-students" class="hidden">
                         <div style="display:flex; justify-content:space-between; margin-bottom:16px;">
-                            <h3>👥 لیست کل قرآن‌آموزان</h3>
-                            <button class="btn btn-primary btn-sm" onclick="openModal('student-modal')">➕ افزودن شاگرد</button>
+                            <h3>👥 لیست کل افراد</h3>
+                            <button class="btn btn-primary btn-sm" onclick="openModal('student-modal')">➕ افزودن فرد جدید</button>
                         </div>
                         <table class="table-mini">
                             <thead><tr><th>نام</th><th>تلفن</th><th>عملیات</th></tr></thead>
@@ -193,28 +194,27 @@
 
                     <div id="tab-classes" class="hidden">
                         <div style="display:flex; justify-content:space-between; margin-bottom:16px;">
-                            <h3>📚 کلاس‌های تعریف شده</h3>
-                            <button class="btn btn-primary btn-sm" onclick="openModal('class-modal')">➕ کلاس جدید</button>
+                            <h3>📚 کلاس‌ها / گروه‌های تعریف شده</h3>
+                            <button class="btn btn-primary btn-sm" onclick="openModal('class-modal')">➕ گروه جدید</button>
                         </div>
                         <table class="table-mini">
-                            <thead><tr><th>نام کلاس</th><th>عملیات</th></tr></thead>
+                            <thead><tr><th>نام کلاس/گروه</th><th>عملیات</th></tr></thead>
                             <tbody id="classes-tbody"></tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <!-- Admin Panel -->
             <div id="admin-panel" class="hidden">
                 <div class="card">
                     <div class="tabs">
-                        <div class="tab active" onclick="switchAdminTab('users')">👨‍🏫 مدیریت مربیان و مدیران</div>
+                        <div class="tab active" onclick="switchAdminTab('users')">👨‍🏫 مدیریت کاربران و دسترسی‌ها</div>
                         <div class="tab" onclick="switchAdminTab('settings')">⚙️ تنظیمات سیستم</div>
                     </div>
 
                     <div id="admin-tab-users">
                         <div style="display:flex; justify-content:space-between; margin-bottom:16px;">
-                            <p style="color:var(--text2); font-size:13px;">در این بخش می‌توانید دسترسی ورود برای مربیان جدید بسازید.</p>
+                            <p style="color:var(--text2); font-size:13px;">در این بخش می‌توانید حساب‌های مربیان یا مدیران را مدیریت کنید.</p>
                             <button class="btn btn-primary btn-sm" onclick="openUserModal()">➕ کاربر جدید</button>
                         </div>
                         <table class="table-mini">
@@ -233,13 +233,12 @@
         </div>
     </div>
 
-    <!-- Modals -->
     <div class="modal" id="student-modal">
         <div class="modal-content">
-            <h3>➕ افزودن شاگرد</h3>
+            <h3>➕ افزودن فرد جدید</h3>
             <label>نام و نام خانوادگی</label><input type="text" id="edit-student-name">
-            <label>شماره موبایل والدین</label><input type="tel" id="edit-student-phone">
-            <label>کلاس</label><select id="edit-student-class"></select>
+            <label>شماره موبایل</label><input type="tel" id="edit-student-phone">
+            <label>کلاس/گروه</label><select id="edit-student-class"></select>
             <div class="modal-actions">
                 <button class="btn btn-primary btn-sm" onclick="saveStudent()">ذخیره</button>
                 <button class="btn btn-outline btn-sm" onclick="closeModal('student-modal')">انصراف</button>
@@ -249,8 +248,8 @@
 
     <div class="modal" id="class-modal">
         <div class="modal-content">
-            <h3>➕ کلاس جدید</h3>
-            <label>نام کلاس</label><input type="text" id="edit-class-name">
+            <h3>➕ کلاس / گروه جدید</h3>
+            <label>نام گروه</label><input type="text" id="edit-class-name">
             <div class="modal-actions">
                 <button class="btn btn-primary btn-sm" onclick="saveClass()">ذخیره</button>
                 <button class="btn btn-outline btn-sm" onclick="closeModal('class-modal')">انصراف</button>
@@ -258,7 +257,6 @@
         </div>
     </div>
 
-    <!-- User Management Modal -->
     <div class="modal" id="user-modal">
         <div class="modal-content">
             <h3 id="user-modal-title">➕ تعریف کاربر جدید</h3>
@@ -280,15 +278,15 @@
 
     <script>
         const todayPersian = new persianDate().format('YYYY/MM/DD');
-        const STORAGE_KEY = 'noor_management_v2';
+        const STORAGE_KEY = 'attendance_management_v2';
         
         let state = {
             currentUser: null, theme: 'dark', cloudUrl: '',
             users: [
-                { id: 'u0', name: 'مدیر کل', role: 'admin', username: 'admin', password: 'admin' },
+                { id: 'u0', name: 'مدیر سیستم', role: 'admin', username: 'admin', password: 'admin' },
                 { id: 'u1', name: 'استاد علوی', role: 'teacher', username: 'alavi', password: '123' }
             ],
-            classes: [{ id: 'c1', name: 'حفظ جزء ۳۰' }],
+            classes: [{ id: 'c1', name: 'گروه الف' }],
             students: [
                 { id: 's1', classId: 'c1', name: 'محمدامین رضایی', phone: '09121111111', attendance: {} },
                 { id: 's2', classId: 'c1', name: 'امیرعلی کریمی', phone: '09122222222', attendance: {} }
@@ -336,7 +334,7 @@
                 
                 if(user.role === 'admin') {
                     document.getElementById('admin-panel').classList.remove('hidden');
-                    document.getElementById('teacher-panel').classList.remove('hidden'); // Admin can also take attendance
+                    document.getElementById('teacher-panel').classList.remove('hidden');
                     renderUsers();
                 } else {
                     document.getElementById('teacher-panel').classList.remove('hidden');
@@ -351,7 +349,7 @@
         function populateClassFilters() {
             const sel1 = document.getElementById('attendance-class-filter');
             const sel2 = document.getElementById('edit-student-class');
-            sel1.innerHTML = '<option value="all">همه کلاس‌ها</option>' + state.classes.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+            sel1.innerHTML = '<option value="all">همه گروه‌ها</option>' + state.classes.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
             sel2.innerHTML = state.classes.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
         }
 
@@ -364,10 +362,9 @@
             if(tab === 'classes') renderClasses();
         }
 
-        // SMS Logic (ارسال پیامک)
+        // SMS Logic
         function sendAbsenceSMS() {
             const date = document.getElementById('attendance-date').value || todayPersian;
-            // پیدا کردن غایبین دارای شماره تلفن
             const absentees = state.students.filter(s => getEffectiveStatus(s.id, date) === 'absent' && s.phone);
             
             if(absentees.length === 0) {
@@ -375,9 +372,8 @@
             }
 
             const phones = absentees.map(s => s.phone).join(',');
-            const message = encodeURIComponent(`ولی محترم، فرزند شما امروز (${date}) در کلاس حضور نداشت.\nسامانه نور`);
+            const message = encodeURIComponent(`با سلام و احترام، فرزند شما امروز (${date}) غایب بود.\nسامانه حضور و غیاب`);
             
-            // باز کردن برنامه پیامک بومی گوشی
             window.location.href = `sms:${phones}?body=${message}`;
             toast('در حال باز کردن برنامه پیامک گوشی...', 'info');
         }
@@ -456,7 +452,7 @@
                 const payload = state.students.map(s => ({ date: date, studentName: s.name, className: state.classes.find(c => c.id === s.classId)?.name || '', status: s.attendance?.[date]?.status || 'حاضر نشده' }));
                 try { await fetch(state.cloudUrl, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) }); toast('✅ در گوگل شیت ذخیره شد!'); } 
                 catch (e) { toast('❌ خطا در ارسال به اینترنت', 'error'); }
-            } else { toast('✅ در گوشی ذخیره شد.'); }
+            } else { toast('✅ در سیستم ذخیره شد.'); }
         }
 
         // Admin User Management
@@ -547,3 +543,4 @@
     </script>
 </body>
 </html>
+
