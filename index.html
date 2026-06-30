@@ -106,8 +106,6 @@
         .role-switch { display: flex; gap: 8px; margin-bottom: 20px; background: rgba(0,0,0,0.2); padding: 6px; border-radius: 14px; }
         .role-btn { flex: 1; padding: 10px; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 13px; transition: 0.3s; text-align: center; color: var(--text2); }
         .role-btn.active { background: var(--accent); color: white; box-shadow: 0 4px 10px rgba(99,102,241,0.4); }
-        
-        .designer-credit { font-size: 11px; color: var(--text2); margin-top: 20px; border-top: 1px solid var(--border); padding-top: 12px; }
     </style>
 </head>
 <body>
@@ -297,18 +295,20 @@
         };
 
         function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
-                function loadData() {
+        
+        function loadData() {
             const saved = localStorage.getItem(STORAGE_KEY);
             if (saved) {
                 try {
                     const parsed = JSON.parse(saved);
-                    // حفظ قرآن‌آموزان و کلاس‌های قبلی
                     if (parsed.students) state.students = parsed.students;
                     if (parsed.classes) state.classes = parsed.classes;
                     if (parsed.tempStatuses) state.tempStatuses = parsed.tempStatuses;
                     if (parsed.cloudUrl) state.cloudUrl = parsed.cloudUrl;
-                    
-                    // بررسی مهم: اگر سیستم کاربری از قبل در حافظه بود آن را بخوان، در غیر این‌صورت به صورت پیش‌فرض ادمین را نگه دار
+                    if (parsed.theme) {
+                        state.theme = parsed.theme;
+                        if(state.theme === 'light') document.body.classList.add('light-theme');
+                    }
                     if (parsed.users && parsed.users.length > 0) {
                         state.users = parsed.users;
                     }
@@ -319,7 +319,6 @@
             }
         }
 
-
         function toast(msg, type='success') {
             const c = document.getElementById('toasts');
             const t = document.createElement('div');
@@ -328,6 +327,9 @@
             c.appendChild(t);
             setTimeout(() => { t.style.opacity='0'; setTimeout(()=>t.remove(),300); }, 3000);
         }
+
+        function openModal(id) { document.getElementById(id).classList.add('active'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
         // Login Logic
         function setLoginRole(role) {
@@ -511,4 +513,164 @@
             document.getElementById('edit-user-id').value = u.id;
             document.getElementById('edit-user-name').value = u.name;
             document.getElementById('edit-user-username').value = u.username;
-            document.getElementById
+            document.getElementById('edit-user-password').value = u.password;
+            document.getElementById('edit-user-role').value = u.role;
+            document.getElementById('user-modal-title').innerText = '✏️ ویرایش کاربر';
+            openModal('user-modal');
+        }
+
+        function saveUser() {
+            const id = document.getElementById('edit-user-id').value;
+            const name = document.getElementById('edit-user-name').value.trim();
+            const username = document.getElementById('edit-user-username').value.trim();
+            const password = document.getElementById('edit-user-password').value.trim();
+            const role = document.getElementById('edit-user-role').value;
+
+            if(!name || !username || !password) return toast('لطفاً همه فیلدها را پر کنید', 'error');
+
+            if(id) {
+                const u = state.users.find(x => x.id === id);
+                if(u) { u.name = name; u.username = username; u.password = password; u.role = role; }
+            } else {
+                if(state.users.some(x => x.username === username)) return toast('این نام کاربری تکراری است', 'error');
+                state.users.push({ id: 'u_' + Date.now(), name, username, password, role });
+            }
+            saveData(); renderUsers(); closeModal('user-modal'); toast('کاربر با موفقیت ذخیره شد');
+        }
+
+        function deleteUser(id) {
+            if(confirm('آیا از حذف این کاربر مطمئن هستید؟')) {
+                state.users = state.users.filter(x => x.id !== id);
+                saveData(); renderUsers(); toast('کاربر حذف شد');
+            }
+        }
+
+        // Student Management Functions
+        function renderManageStudents() {
+            document.getElementById('manage-students-tbody').innerHTML = state.students.map(s => {
+                const className = state.classes.find(c => c.id === s.classId)?.name || 'بدون گروه';
+                return `<tr>
+                    <td><strong>${s.name}</strong> <span style="font-size:10px; color:var(--text2);">(${className})</span></td>
+                    <td>${s.phone || '-'}</td>
+                    <td>
+                        <button class="btn btn-xs btn-outline" onclick="editStudent('${s.id}')">✏️</button>
+                        <button class="btn btn-xs btn-danger" onclick="deleteStudent('${s.id}')">حذف</button>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        function openStudentModal() {
+            document.getElementById('edit-student-id').value = '';
+            document.getElementById('edit-student-name').value = '';
+            document.getElementById('edit-student-phone').value = '';
+            populateClassFilters();
+            openModal('student-modal');
+        }
+
+        function editStudent(id) {
+            const s = state.students.find(x => x.id === id);
+            if(!s) return;
+            document.getElementById('edit-student-id').value = s.id;
+            document.getElementById('edit-student-name').value = s.name;
+            document.getElementById('edit-student-phone').value = s.phone;
+            populateClassFilters();
+            document.getElementById('edit-student-class').value = s.classId;
+            openModal('student-modal');
+        }
+
+        function saveStudent() {
+            const id = document.getElementById('edit-student-id').value;
+            const name = document.getElementById('edit-student-name').value.trim();
+            const phone = document.getElementById('edit-student-phone').value.trim();
+            const classId = document.getElementById('edit-student-class').value;
+
+            if(!name) return toast('نام قرآن‌آموز الزامی است', 'error');
+
+            if(id) {
+                const s = state.students.find(x => x.id === id);
+                if(s) { s.name = name; s.phone = phone; s.classId = classId; }
+            } else {
+                state.students.push({ id: 's_' + Date.now(), name, phone, classId, attendance: {} });
+            }
+            saveData(); renderManageStudents(); renderStudentList(); closeModal('student-modal'); toast('اطلاعات قرآن‌آموز ذخیره شد');
+        }
+
+        function deleteStudent(id) {
+            if(confirm('آیا از حذف این قرآن‌آموز مطمئن هستید؟')) {
+                state.students = state.students.filter(x => x.id !== id);
+                saveData(); renderManageStudents(); renderStudentList(); toast('قرآن‌آموز حذف شد');
+            }
+        }
+
+        // Class Management Functions
+        function renderClasses() {
+            document.getElementById('classes-tbody').innerHTML = state.classes.map(c => `
+                <tr>
+                    <td><strong>${c.name}</strong></td>
+                    <td>
+                        <button class="btn btn-xs btn-outline" onclick="editClass('${c.id}')">✏️</button>
+                        <button class="btn btn-xs btn-danger" onclick="deleteClass('${c.id}')">حذف</button>
+                    </td>
+                </tr>`).join('');
+        }
+
+        function openClassModal() {
+            document.getElementById('edit-class-id').value = '';
+            document.getElementById('edit-class-name').value = '';
+            openModal('class-modal');
+        }
+
+        function editClass(id) {
+            const c = state.classes.find(x => x.id === id);
+            if(!c) return;
+            document.getElementById('edit-class-id').value = c.id;
+            document.getElementById('edit-class-name').value = c.name;
+            openModal('class-modal');
+        }
+
+        function saveClass() {
+            const id = document.getElementById('edit-class-id').value;
+            const name = document.getElementById('edit-class-name').value.trim();
+            if(!name) return toast('نام گروه الزامی است', 'error');
+
+            if(id) {
+                const c = state.classes.find(x => x.id === id);
+                if(c) c.name = name;
+            } else {
+                state.classes.push({ id: 'c_' + Date.now(), name });
+            }
+            saveData(); populateClassFilters(); renderClasses(); closeModal('class-modal'); toast('گروه ذخیره شد');
+        }
+
+        function deleteClass(id) {
+            if(confirm('با حذف این گروه، قرآن‌آموزان آن بدون گروه خواهند شد. مطمئن هستید؟')) {
+                state.classes = state.classes.filter(x => x.id !== id);
+                saveData(); populateClassFilters(); renderClasses(); toast('گروه حذف شد');
+            }
+        }
+
+        // Settings & Theme
+        function saveCloudUrl() {
+            const url = document.getElementById('cloud-url-input').value.trim();
+            state.cloudUrl = url;
+            saveData();
+            toast('لینک اتصال با موفقیت ذخیره شد');
+        }
+
+        function toggleTheme() {
+            if(state.theme === 'dark') {
+                state.theme = 'light';
+                document.body.classList.add('light-theme');
+            } else {
+                state.theme = 'dark';
+                document.body.classList.remove('light-theme');
+            }
+            saveData();
+        }
+
+        // اجرای اولیه برنامه جهت فراخوانی داده‌ها
+        loadData();
+    </script>
+</body>
+</html>
