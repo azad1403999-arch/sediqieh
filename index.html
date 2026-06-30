@@ -152,7 +152,7 @@
                 <div class="card">
                     <div class="tabs">
                         <div class="tab active" onclick="switchTeacherTab('attendance')">📋 ثبت حضور</div>
-                        <div class="tab" onclick="switchTeacherTab('students')">👥 مدیریت مراجعین</div>
+                        <div class="tab" onclick="switchTeacherTab('students')">👥 مدیریت قرآن‌آموزان</div>
                         <div class="tab" onclick="switchTeacherTab('classes')">📚 کلاس‌ها / گروه‌ها</div>
                     </div>
 
@@ -183,8 +183,8 @@
 
                     <div id="tab-students" class="hidden">
                         <div style="display:flex; justify-content:space-between; margin-bottom:16px;">
-                            <h3>👥 لیست کل افراد</h3>
-                            <button class="btn btn-primary btn-sm" onclick="openModal('student-modal')">➕ افزودن فرد جدید</button>
+                            <h3>👥 لیست قرآن‌آموزان</h3>
+                            <button class="btn btn-primary btn-sm" onclick="openStudentModal()">➕ افزودن قرآن‌آموز جدید</button>
                         </div>
                         <table class="table-mini">
                             <thead><tr><th>نام</th><th>تلفن</th><th>عملیات</th></tr></thead>
@@ -195,7 +195,7 @@
                     <div id="tab-classes" class="hidden">
                         <div style="display:flex; justify-content:space-between; margin-bottom:16px;">
                             <h3>📚 کلاس‌ها / گروه‌های تعریف شده</h3>
-                            <button class="btn btn-primary btn-sm" onclick="openModal('class-modal')">➕ گروه جدید</button>
+                            <button class="btn btn-primary btn-sm" onclick="openClassModal()">➕ گروه جدید</button>
                         </div>
                         <table class="table-mini">
                             <thead><tr><th>نام کلاس/گروه</th><th>عملیات</th></tr></thead>
@@ -235,7 +235,8 @@
 
     <div class="modal" id="student-modal">
         <div class="modal-content">
-            <h3>➕ افزودن فرد جدید</h3>
+            <h3>قرآن‌آموز</h3>
+            <input type="hidden" id="edit-student-id">
             <label>نام و نام خانوادگی</label><input type="text" id="edit-student-name">
             <label>شماره موبایل</label><input type="tel" id="edit-student-phone">
             <label>کلاس/گروه</label><select id="edit-student-class"></select>
@@ -248,7 +249,8 @@
 
     <div class="modal" id="class-modal">
         <div class="modal-content">
-            <h3>➕ کلاس / گروه جدید</h3>
+            <h3>کلاس / گروه</h3>
+            <input type="hidden" id="edit-class-id">
             <label>نام گروه</label><input type="text" id="edit-class-name">
             <div class="modal-actions">
                 <button class="btn btn-primary btn-sm" onclick="saveClass()">ذخیره</button>
@@ -266,7 +268,7 @@
             <label>رمز عبور</label><input type="text" id="edit-user-password" dir="ltr">
             <label>نقش کاربر</label>
             <select id="edit-user-role">
-                <option value="teacher">مربی (فقط ثبت حضور)</option>
+                <option value="teacher">مربی (ثبت و مدیریت قرآن‌آموزان)</option>
                 <option value="admin">مدیر (دسترسی کامل)</option>
             </select>
             <div class="modal-actions">
@@ -492,54 +494,4 @@
             document.getElementById('edit-user-id').value = u.id;
             document.getElementById('edit-user-name').value = u.name;
             document.getElementById('edit-user-username').value = u.username;
-            document.getElementById('edit-user-password').value = u.password;
-            document.getElementById('edit-user-role').value = u.role;
-            document.getElementById('user-modal-title').innerText = '✏️ ویرایش کاربر';
-            openModal('user-modal');
-        }
-
-        function saveUser() {
-            const id = document.getElementById('edit-user-id').value;
-            const name = document.getElementById('edit-user-name').value.trim();
-            const username = document.getElementById('edit-user-username').value.trim();
-            const password = document.getElementById('edit-user-password').value.trim();
-            const role = document.getElementById('edit-user-role').value;
-
-            if(!name || !username || !password) return toast('همه فیلدها الزامی است', 'error');
-
-            if(id) {
-                const u = state.users.find(x => x.id === id);
-                u.name = name; u.username = username; u.password = password; u.role = role;
-            } else {
-                if(state.users.some(x => x.username === username)) return toast('این نام کاربری از قبل وجود دارد', 'error');
-                state.users.push({ id: 'u'+Date.now(), name, username, password, role });
-            }
-            saveData(); closeModal('user-modal'); renderUsers(); toast('کاربر با موفقیت ذخیره شد');
-        }
-
-        function deleteUser(id) {
-            if(confirm('آیا از حذف این کاربر مطمئن هستید؟')) {
-                state.users = state.users.filter(u => u.id !== id);
-                saveData(); renderUsers();
-            }
-        }
-
-        function saveCloudUrl() { state.cloudUrl = document.getElementById('cloud-url-input').value.trim(); saveData(); toast('لینک ابری ذخیره شد'); }
-
-        // Data Management Methods (Students & Classes)
-        function renderManageStudents() { document.getElementById('manage-students-tbody').innerHTML = state.students.map(s => `<tr><td><strong>${s.name}</strong></td><td>${s.phone}</td><td><button class="btn btn-xs btn-danger" onclick="deleteStu('${s.id}')">حذف</button></td></tr>`).join(''); }
-        function saveStudent() { state.students.push({ id: 's'+Date.now(), name: document.getElementById('edit-student-name').value, phone: document.getElementById('edit-student-phone').value, classId: document.getElementById('edit-student-class').value, attendance:{} }); saveData(); closeModal('student-modal'); renderManageStudents(); }
-        function deleteStu(id) { state.students = state.students.filter(s=>s.id!==id); saveData(); renderManageStudents(); }
-
-        function renderClasses() { document.getElementById('classes-tbody').innerHTML = state.classes.map(c => `<tr><td><strong>${c.name}</strong></td><td><button class="btn btn-xs btn-danger" onclick="deleteCls('${c.id}')">حذف</button></td></tr>`).join(''); }
-        function saveClass() { state.classes.push({ id:'c'+Date.now(), name:document.getElementById('edit-class-name').value }); saveData(); closeModal('class-modal'); populateClassFilters(); renderClasses(); }
-        function deleteCls(id) { state.classes=state.classes.filter(c=>c.id!==id); saveData(); renderClasses(); }
-
-        function openModal(id) { document.getElementById(id).classList.add('active'); }
-        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
-        function toggleTheme() { document.body.classList.toggle('light-theme'); }
-
-        loadData();
-    </script>
-</body>
-</html>
+            document.getElementById
