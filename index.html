@@ -297,11 +297,28 @@
         };
 
         function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
-        function loadData() {
+                function loadData() {
             const saved = localStorage.getItem(STORAGE_KEY);
-            if (saved) { try { state = JSON.parse(saved); } catch(e) {} }
-            document.getElementById('cloud-url-input').value = state.cloudUrl;
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    // حفظ قرآن‌آموزان و کلاس‌های قبلی
+                    if (parsed.students) state.students = parsed.students;
+                    if (parsed.classes) state.classes = parsed.classes;
+                    if (parsed.tempStatuses) state.tempStatuses = parsed.tempStatuses;
+                    if (parsed.cloudUrl) state.cloudUrl = parsed.cloudUrl;
+                    
+                    // بررسی مهم: اگر سیستم کاربری از قبل در حافظه بود آن را بخوان، در غیر این‌صورت به صورت پیش‌فرض ادمین را نگه دار
+                    if (parsed.users && parsed.users.length > 0) {
+                        state.users = parsed.users;
+                    }
+                } catch(e) {}
+            }
+            if(document.getElementById('cloud-url-input')) {
+                document.getElementById('cloud-url-input').value = state.cloudUrl || '';
+            }
         }
+
 
         function toast(msg, type='success') {
             const c = document.getElementById('toasts');
