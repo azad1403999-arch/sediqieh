@@ -33,7 +33,7 @@
         .tab { padding: 10px 20px; border-radius: 12px; cursor: pointer; color: var(--text2); font-weight: 600; font-size: 13px; }
         .tab.active { background: linear-gradient(135deg, var(--accent), #4f46e5); color: white; }
         input[type="text"], input[type="password"], input[type="tel"], select { padding: 10px 14px; background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-size: 12px; outline: none; width: 100%; margin-bottom: 10px; }
-        .light-theme input, .light-theme select { background: #f1f5f9; }
+        .light-theme { background: #f1f5f9; }
         .toolbar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
         .toolbar-group { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
         .toolbar input, .toolbar select { width: auto; margin-bottom: 0; }
@@ -80,7 +80,6 @@
 <body>
     <div class="toast-container" id="toasts"></div>
     <div class="container">
-        <!-- صفحه ورود -->
         <div id="login-screen">
             <div class="login-box">
                 <div style="font-size: 56px; margin-bottom: 12px;">📋</div>
@@ -97,7 +96,6 @@
             </div>
         </div>
 
-        <!-- صفحه اصلی -->
         <div id="app-screen" class="hidden">
             <div class="header">
                 <div>
@@ -171,16 +169,18 @@
         </div>
     </div>
 
-    <!-- مۆدال‌ها -->
     <div class="modal" id="student-modal"><div class="modal-content"><h3>قرآن‌آموز</h3><input type="hidden" id="edit-student-id"><label>نام</label><input type="text" id="edit-student-name"><label>تلفن</label><input type="text" id="edit-student-phone"><label>گروه</label><select id="edit-student-class"></select><div class="modal-actions"><button class="btn btn-primary btn-sm" onclick="saveStudent()">ذخیره</button><button class="btn btn-outline btn-sm" onclick="closeModal('student-modal')">انصراف</button></div></div></div>
     <div class="modal" id="class-modal"><div class="modal-content"><h3>گروه</h3><input type="hidden" id="edit-class-id"><label>نام گروه</label><input type="text" id="edit-class-name"><div class="modal-actions"><button class="btn btn-primary btn-sm" onclick="saveClass()">ذخیره</button><button class="btn btn-outline btn-sm" onclick="closeModal('class-modal')">انصراف</button></div></div></div>
     <div class="modal" id="user-modal"><div class="modal-content"><h3>کاربر</h3><input type="hidden" id="edit-user-id"><label>نام کامل</label><input type="text" id="edit-user-name"><label>نام کاربری</label><input type="text" id="edit-user-username" dir="ltr"><label>رمز عبور</label><input type="text" id="edit-user-password" dir="ltr"><label>نقش</label><select id="edit-user-role"><option value="teacher">مربی</option><option value="admin">مدیر</option></select><div class="modal-actions"><button class="btn btn-primary btn-sm" onclick="saveUser()">ذخیره</button><button class="btn btn-outline btn-sm" onclick="closeModal('user-modal')">انصراف</button></div></div></div>
 
     <script>
+        // 🔴 مهم: لینک گوگل اسکریپت خود را دقیقاً داخل دو کوتیشن زیر جایگزین کنید:
+        const HARDCODED_CLOUD_URL = "https://script.google.com/macros/s/AKfycbzv3E2wP4NWwm_tHMJInwT-zUKXTgj508IjC_ZouF0Om4cJrLrqQ1XRDdFrayWl_aEAyw/exec";
+
         const todayPersian = new persianDate().format('YYYY/MM/DD');
         const STORAGE_KEY = 'attendance_management_v3';
         let state = {
-            currentUser: null, theme: 'dark', cloudUrl: '',
+            currentUser: null, theme: 'dark', cloudUrl: HARDCODED_CLOUD_URL,
             users: [{ id: 'u0', name: 'مدیر سیستم', role: 'admin', username: 'admin', password: 'admin' }],
             classes: [], students: [], tempStatuses: {}, filterStatus: 'all'
         };
@@ -192,8 +192,8 @@
             if (saved) {
                 try {
                     const parsed = JSON.parse(saved);
-                    if (parsed.cloudUrl) state.cloudUrl = parsed.cloudUrl;
                     if (parsed.theme) { state.theme = parsed.theme; if(state.theme === 'light') document.body.classList.add('light-theme'); }
+                    if (!state.cloudUrl && parsed.cloudUrl) state.cloudUrl = parsed.cloudUrl;
                 } catch(e) {}
             }
             if(document.getElementById('cloud-url-input')) document.getElementById('cloud-url-input').value = state.cloudUrl || '';
